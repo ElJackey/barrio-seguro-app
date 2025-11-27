@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Barrio Seguro Final</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+
+  <section id="auth-layer" class="auth-container">
+    <div id="view-login" class="auth-card glass-panel fade-in">
+      <div class="auth-header">
+        <div class="logo-box"><i class="ph-fill ph-shield-check"></i></div>
+        <h1>Barrio Seguro</h1>
+        <p>Plataforma de Seguridad Integrada</p>
+      </div>
+      <form onsubmit="event.preventDefault(); loginSubmit();">
+        <div class="input-wrapper">
+          <i class="ph ph-identification-card"></i>
+          <input type="text" id="login-dni" placeholder="DNI" inputmode="numeric" required autocomplete="off">
+        </div>
+        <div class="input-wrapper">
+          <i class="ph ph-lock-key"></i>
+          <input type="password" id="login-pass" placeholder="Contraseña" required>
+        </div>
+        <button type="submit" class="btn-primary glow-effect">Iniciar Sesión</button>
+      </form>
+      <p class="auth-footer">¿Nuevo usuario? <a href="#" onclick="switchAuth('register')">Crear cuenta vecinal</a></p>
+    </div>
+
+    <div id="view-register" class="auth-card glass-panel hidden">
+      <div class="auth-header">
+        <h2>Registro Vecinal</h2>
+        <p>Únete a la red de seguridad</p>
+      </div>
+      <form onsubmit="event.preventDefault(); registerSubmit();">
+        <div class="input-wrapper">
+          <i class="ph ph-user"></i>
+          <input type="text" id="reg-name" placeholder="Nombre Completo" required>
+        </div>
+        <div class="input-wrapper">
+          <i class="ph ph-identification-card"></i>
+          <input type="text" id="reg-dni" placeholder="DNI (Será tu usuario)" inputmode="numeric" required>
+        </div>
+        <div class="input-wrapper">
+          <i class="ph ph-lock-key"></i>
+          <input type="password" id="reg-pass" placeholder="Crear Contraseña" required>
+        </div>
+        <button type="submit" class="btn-primary">Registrarse</button>
+      </form>
+      <p class="auth-footer">¿Ya tienes cuenta? <a href="#" onclick="switchAuth('login')">Volver</a></p>
+    </div>
+  </section>
+
+  <section id="app-layer" class="app-container hidden">
+    <div id="map-viewport" class="fullscreen-map">
+      <div id="map-inner" class="map-canvas"></div>
+    </div>
+
+    <header class="floating-header glass-panel">
+      <div class="user-info" onclick="showTab('profile')">
+        <div class="avatar-circle" id="header-avatar">👤</div>
+        <div class="text-group">
+          <h3 id="ui-user-name">Usuario</h3>
+          <span id="ui-user-role">Vecino</span>
+        </div>
+      </div>
+      <button class="btn-icon-sm" onclick="logout()"><i class="ph-bold ph-sign-out"></i></button>
+    </header>
+
+    <div class="map-controls">
+      <button onclick="geolocate()" class="btn-blur"><i class="ph-bold ph-crosshair"></i></button>
+      <button onclick="zoomMap(0.5)" class="btn-blur"><i class="ph-bold ph-plus"></i></button>
+      <button onclick="zoomMap(-0.5)" class="btn-blur"><i class="ph-bold ph-minus"></i></button>
+    </div>
+
+    <nav class="floating-dock glass-panel">
+      <button class="dock-item active" onclick="showTab('map')">
+        <i class="ph-fill ph-map-trifold"></i>
+        <span>Mapa</span>
+      </button>
+      <button class="dock-item" onclick="showTab('alerts')">
+        <i class="ph-fill ph-bell-ringing"></i>
+        <span>Alertas</span>
+      </button>
+      
+      <div class="dock-sos-wrapper" id="dock-sos-btn">
+        <button class="btn-sos-big pulse-animation" onclick="openModal('sos')">S.O.S</button>
+      </div>
+      
+      <button class="dock-item" onclick="showTab('directory')">
+        <i class="ph-fill ph-phone-call"></i>
+        <span>Ayuda</span>
+      </button>
+      
+      <button class="dock-item" onclick="showTab('profile')">
+        <i class="ph-fill ph-user-circle"></i>
+        <span>Perfil</span>
+      </button>
+    </nav>
+
+    <div id="drawer-alerts" class="bottom-drawer hidden">
+      <div class="drawer-handle"></div>
+      <div class="drawer-header">
+        <h3>Historial de Reportes</h3>
+        <span class="badge" id="alert-count">0</span>
+      </div>
+      <div class="drawer-content" id="feed-list"></div>
+    </div>
+
+    <div id="drawer-directory" class="bottom-drawer hidden">
+      <div class="drawer-handle"></div>
+      <h3>Directorio de Emergencia</h3>
+      <div class="directory-grid">
+        <div class="dir-card serenazgo" onclick="makeCall('Serenazgo')">
+          <div class="icon-box"><i class="ph-fill ph-shield-star"></i></div>
+          <div><strong>Serenazgo</strong><small>Central</small></div>
+          <button class="btn-call"><i class="ph-fill ph-phone"></i></button>
+        </div>
+        <div class="dir-card police" onclick="makeCall('Policía')">
+          <div class="icon-box"><i class="ph-fill ph-police-car"></i></div>
+          <div><strong>Policía 105</strong><small>Nacional</small></div>
+          <button class="btn-call"><i class="ph-fill ph-phone"></i></button>
+        </div>
+        <div class="dir-card samu" onclick="makeCall('SAMU')">
+          <div class="icon-box"><i class="ph-fill ph-ambulance"></i></div>
+          <div><strong>SAMU 106</strong><small>Médico</small></div>
+          <button class="btn-call"><i class="ph-fill ph-phone"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <div id="drawer-profile" class="bottom-drawer hidden">
+      <div class="drawer-handle"></div>
+      <div class="profile-container">
+        <div class="profile-avatar-large">👤</div>
+        <h2 id="profile-name-display">Nombre Usuario</h2>
+        <span class="profile-role-tag" id="profile-role-display">Residente</span>
+        
+        <div class="profile-stats">
+          <div class="stat-box">
+            <strong id="stat-reports-count">0</strong>
+            <small>Reportes</small>
+          </div>
+          <div class="stat-box">
+            <strong>Alta</strong>
+            <small>Reputación</small>
+          </div>
+        </div>
+
+        <div class="profile-info-list">
+          <div class="info-row">
+            <i class="ph ph-identification-card"></i>
+            <span id="profile-dni-display">DNI: ---</span>
+          </div>
+          <div class="info-row">
+            <i class="ph ph-map-pin"></i>
+            <span>Santiago de Surco, Lima</span>
+          </div>
+        </div>
+
+        <button class="btn-primary btn-logout" onclick="logout()">
+          <i class="ph-bold ph-sign-out"></i> Cerrar Sesión
+        </button>
+      </div>
+    </div>
+
+  </section>
+
+  <div id="modal-sos" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-top">
+        <h3>Crear Alerta</h3>
+        <button class="btn-close" onclick="closeModal('sos')"><i class="ph-bold ph-x"></i></button>
+      </div>
+      <button class="panic-slider" onclick="triggerPanic()">
+        <div class="panic-icon"><i class="ph-fill ph-broadcast"></i></div>
+        <div class="panic-text"><strong>PÁNICO SILENCIOSO</strong><small>Envía GPS en tiempo real</small></div>
+      </button>
+      <div class="divider">o reportar incidente</div>
+      <div class="grid-actions">
+        <button class="action-btn" onclick="sendReport('Robo')">🧤 Robo</button>
+        <button class="action-btn" onclick="sendReport('Sospechoso')">👀 Sospechoso</button>
+        <button class="action-btn" onclick="sendReport('Violencia')">👊 Violencia</button>
+        <button class="action-btn" onclick="sendReport('Accidente')">🚑 Accidente</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
